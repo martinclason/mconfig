@@ -1,0 +1,18 @@
+# use-omz needs to be FIRST
+getantidote/use-omz
+
+ohmyzsh/ohmyzsh path:lib
+ohmyzsh/ohmyzsh path:plugins/colored-man-pages
+#ohmyzsh/ohmyzsh path:plugins/docker-compose
+ohmyzsh/ohmyzsh path:plugins/gh
+#ohmyzsh/ohmyzsh path:plugins/git
+#ohmyzsh/ohmyzsh path:plugins/git-prompt
+#ohmyzsh/ohmyzsh path:plugins/rsync
+#ohmyzsh/ohmyzsh path:plugins/ssh
+
+#ohmyzsh/ohmyzsh path:plugins/brew conditional:is-macos
+#ohmyzsh/ohmyzsh path:plugins/macos conditional:is-macos
+#ohmyzsh/ohmyzsh path:plugins/iterm2 conditional:is-macos
+
+zsh-users/zsh-autosuggestions
+zsh-users/zsh-syntax-highlighting
