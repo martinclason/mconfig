@@ -46,7 +46,8 @@ typeset -gi CMD_RUNTIME_SECONDS_DECIMALS=1
 
 typeset -g CMD_RUNTIME_COLOR='yellow'
 typeset -g CLOCK_COLOR='244'
-typeset -g CLOCK_FORMAT='%D{%H:%M:%S}'
+# typeset -g CLOCK_FORMAT='%D{%H:%M:%S}'
+typeset -g CLOCK_FORMAT='%D{%H:%M}'
 typeset -g RPROMPT_SEPARATOR=' < '
 
 # ── Runtime state ──────────────────────────────────────────────────────
@@ -91,9 +92,9 @@ _my_timer_precmd() {
     __cmd_start_time=0
 
     if [[ -n "$__cmd_runtime" ]]; then
-        RPROMPT="%F{${CMD_RUNTIME_COLOR}}${__cmd_runtime}%f${RPROMPT_SEPARATOR}%F{${CLOCK_COLOR}}[${CLOCK_FORMAT}]%f"
+        RPROMPT="%F{${CMD_RUNTIME_COLOR}}${__cmd_runtime}%f${RPROMPT_SEPARATOR}%F{${CLOCK_COLOR}}${CLOCK_FORMAT}%f"
     else
-        RPROMPT="%F{${CLOCK_COLOR}}[${CLOCK_FORMAT}]%f"
+        RPROMPT="%F{${CLOCK_COLOR}}${CLOCK_FORMAT}%f"
     fi
 
     return $exit_status
