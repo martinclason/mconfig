@@ -34,11 +34,24 @@ PROMPT='%F{blue}%~%f %(?.%F{green}.%F{red})%#%f '
 autoload -Uz add-zsh-hook
 zmodload zsh/datetime
 
+# Remove hooks before re-adding them when reloading ~/.zshrc
 add-zsh-hook -d preexec _my_timer_preexec 2>/dev/null
-add-zsh-hook -d precmd _my_timer_precmd 2>/dev/null
+add-zsh-hook -d precmd  _my_timer_precmd  2>/dev/null
 
+# ── Right-prompt settings ──────────────────────────────────────────────
+typeset -gi CMD_RUNTIME_MIN_MS=50        # Do not show runtimes below this
+typeset -gi CMD_RUNTIME_MS_UNTIL=5000    # Display as "1234 ms" up to this
+typeset -gi CMD_RUNTIME_SECONDS_UNTIL=60 # Display as "8.2 s" below this many seconds
+typeset -gi CMD_RUNTIME_SECONDS_DECIMALS=1
+
+typeset -g CMD_RUNTIME_COLOR='yellow'
+typeset -g CLOCK_COLOR='244'
+typeset -g CLOCK_FORMAT='%D{%H:%M:%S}'
+typeset -g RPROMPT_SEPARATOR=' < '
+
+# ── Runtime state ──────────────────────────────────────────────────────
 typeset -g __cmd_start_time=0
-typeset -g __cmd_runtime=""
+typeset -g __cmd_runtime=''
 
 _my_timer_preexec() {
     __cmd_start_time=$EPOCHREALTIME
@@ -46,33 +59,48 @@ _my_timer_preexec() {
 
 _my_timer_precmd() {
     local exit_status=$?
-    local elapsed
+    local -i elapsed_ms total_seconds minutes seconds
+    local formatted_seconds
+
+    # Clear previous runtime. This makes it disappear when pressing Enter.
+    __cmd_runtime=''
 
     if (( __cmd_start_time > 0 )); then
-        elapsed=$(( EPOCHREALTIME - __cmd_start_time ))
-        if (( elapsed >= 3 )); then
-            if (( elapsed >= 60 )); then
-                __cmd_runtime="$(( int(elapsed / 60) ))m $(( int(elapsed % 60) ))s"
+        elapsed_ms=$(( (EPOCHREALTIME - __cmd_start_time) * 1000 + 0.5 ))
+
+        if (( elapsed_ms >= CMD_RUNTIME_MIN_MS )); then
+            if (( elapsed_ms <= CMD_RUNTIME_MS_UNTIL )); then
+                __cmd_runtime="${elapsed_ms} ms"
+
+            elif (( elapsed_ms < CMD_RUNTIME_SECONDS_UNTIL * 1000 )); then
+                formatted_seconds="$(
+                    LC_NUMERIC=C printf "%.${CMD_RUNTIME_SECONDS_DECIMALS}f s" \
+                        "$(( elapsed_ms / 1000.0 ))"
+                )"
+                __cmd_runtime="$formatted_seconds"
+
             else
-		__cmd_runtime="$(LC_NUMERIC=C printf '%.1fs' "$elapsed")"
+                total_seconds=$(( elapsed_ms / 1000 ))
+                minutes=$(( total_seconds / 60 ))
+                seconds=$(( total_seconds % 60 ))
+                __cmd_runtime="${minutes}m ${seconds}s"
             fi
-        else
-            __cmd_runtime=""
         fi
     fi
-    __cmd_start_time=0
-    if [[ -n "$__cmd_runtime" ]]; then
-        RPROMPT="%F{yellow}${__cmd_runtime}%f"
-    else
-        RPROMPT="%F{244}%*%f"
-    fi
-    return $exit_status
 
+    __cmd_start_time=0
+
+    if [[ -n "$__cmd_runtime" ]]; then
+        RPROMPT="%F{${CMD_RUNTIME_COLOR}}${__cmd_runtime}%f${RPROMPT_SEPARATOR}%F{${CLOCK_COLOR}}[${CLOCK_FORMAT}]%f"
+    else
+        RPROMPT="%F{${CLOCK_COLOR}}[${CLOCK_FORMAT}]%f"
+    fi
+
+    return $exit_status
 }
 
 add-zsh-hook preexec _my_timer_preexec
-add-zsh-hook precmd _my_timer_precmd
-
+add-zsh-hook precmd  _my_timer_precmd
 
 
 source ~/.alias.bash
