@@ -48,3 +48,15 @@ brew install homebrew/cask-fonts/font-roboto-mono-for-powerline
 To be able to use nvm with fish this plugin is used: https://github.com/FabioAntunes/fish-nvm.
 
 It wraps regular nvm and will automatically load when running e.g. `node`, `yarn` or `npm`. In order to have it also recognize `react-native`, the fish function `nvm_alias_function react-native` is called.
+
+
+## tmux
+``bash
+git clone https://github.com/tmux-plugins/tpm ~/.tmux/plugins/tpm
+```
+
+Inside tmux, run <leader>+I to install all plugins using tpm. I have currently mapped <leader> to Ctrl-S.
+
+Using copy paste:
+
+<leader>+[ and then line select with shift-v, copy to system clipboard using y. Dragging mouse also works.
